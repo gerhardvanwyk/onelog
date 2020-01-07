@@ -9,7 +9,7 @@ import (
 type Entry struct {
 	enc     *Encoder
 	l       *Logger
-	Level   uint8
+	Level   uint32
 	Message string
 }
 

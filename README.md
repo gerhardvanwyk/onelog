@@ -6,8 +6,21 @@
 )](https://godoc.org/github.com/francoispqt/onelog)
 ![MIT License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 
-# Onelog
-Onelog is a dead simple but very efficient JSON logger. 
+# OnelogPlus
+Based on github.com/francoispqt/onelog
+
+Adds more log levels to include [FINEST, FINER, FINE, DEBUG, CONFIG, INFO, WARN, ERROR, FATAL, SEVERE ]
+
+Most common use cases a subset is used as a conventions. 
+
+* The log4j set [TRACE, DEBUG, INFO, WARN, ERROR] 
+* The JUL set [FINEST, FINER, FINE, CONFIG, WARN, SEVERE]
+
+It uses the same implementation as onelog, the only difference is the level setting is based on range. If you set the 
+level on DEBUG then all levels are enabled above DEBUG => CONFIG, INFO, WARN, ERROR, SEVERE, FATAL
+FINEST is the lowest to FATAL the highest.
+
+It is a dead simple but very efficient JSON logger. 
 It is one of the fastest JSON logger out there. Also, it is one of the logger with the lowest allocation.
 
 It gives more control over log levels enabled by using bitwise operation for setting levels on a logger.

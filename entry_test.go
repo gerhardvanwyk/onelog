@@ -135,8 +135,8 @@ func TestEntryFields(t *testing.T) {
 		`"testAnyInt":10,` +
 		`"testErr":"my printer is on fire"}` + "\n"
 	testCases := []struct {
-		level       uint8
-		disabled    uint8
+		level       uint32
+		disabled    uint32
 		levelString string
 		entryFunc   func(*Logger) ChainEntry
 	}{

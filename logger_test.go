@@ -85,34 +85,35 @@ func TestOnelogFeature(t *testing.T) {
 		assert.Equal(t, "logger_test.go:83", strs[len(strs)-1], "file should be logger_test.go:81")
 	})
 }
+
 func TestOnelogWithoutFields(t *testing.T) {
 	t.Run("basic-message-info", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|INFO|WARN|ERROR|FATAL)
+		logger := New(w, INFO)
 		logger.Info("message")
 		assert.Equal(t, `{"level":"info","message":"message"}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-debug", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|INFO|WARN|ERROR|FATAL)
+		logger := New(w, DEBUG)
 		logger.Debug("message")
 		assert.Equal(t, `{"level":"debug","message":"message"}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-warn", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|INFO|WARN|ERROR|FATAL)
+		logger := New(w, WARN)
 		logger.Warn("message")
 		assert.Equal(t, `{"level":"warn","message":"message"}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-error", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|INFO|WARN|ERROR|FATAL)
+		logger := New(w, ERROR)
 		logger.Error("message")
 		assert.Equal(t, `{"level":"error","message":"message"}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-fatal", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|INFO|WARN|ERROR|FATAL)
+		logger := New(w, FATAL)
 		logger.ExitFn = func(c int) {
 			panic("os.Exit called")
 		}
@@ -127,64 +128,59 @@ func TestOnelogWithoutFields(t *testing.T) {
 	})
 	t.Run("basic-message-disabled-level-info", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|WARN|ERROR|FATAL)
+		logger := New(w, WARN)
 		logger.Info("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-debug", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|WARN|ERROR|FATAL)
+		logger := New(w, FINER)
 		logger.Debug("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-warn", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|DEBUG|ERROR|FATAL)
+		logger := New(w, ERROR)
 		logger.Warn("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-error", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|WARN|DEBUG|FATAL)
+		logger := New(w, FATAL)
 		logger.Error("message")
-		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
+		assert.Equal(t, ``, string(w.b), "error level is turned off")
 	})
-	t.Run("basic-message-disabled-level-fatal", func(t *testing.T) {
-		w := newWriter()
-		logger := New(w, INFO|WARN|ERROR|DEBUG)
-		logger.Fatal("message")
-		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
-	})
+
 }
 
 func TestOnelogContextWithoutFields(t *testing.T) {
 	t.Run("basic-message-info", func(t *testing.T) {
 		w := newWriter()
-		logger := NewContext(w, DEBUG|INFO|WARN|ERROR|FATAL, "params")
+		logger := NewContext(w, INFO, "params")
 		logger.Info("message")
 		assert.Equal(t, `{"level":"info","message":"message","params":{}}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-debug", func(t *testing.T) {
 		w := newWriter()
-		logger := NewContext(w, DEBUG|INFO|WARN|ERROR|FATAL, "params")
+		logger := NewContext(w, DEBUG, "params")
 		logger.Debug("message")
 		assert.Equal(t, `{"level":"debug","message":"message","params":{}}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-warn", func(t *testing.T) {
 		w := newWriter()
-		logger := NewContext(w, DEBUG|INFO|WARN|ERROR|FATAL, "params")
+		logger := NewContext(w, WARN, "params")
 		logger.Warn("message")
 		assert.Equal(t, `{"level":"warn","message":"message","params":{}}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-error", func(t *testing.T) {
 		w := newWriter()
-		logger := NewContext(w, DEBUG|INFO|WARN|ERROR|FATAL, "params")
+		logger := NewContext(w, ERROR, "params")
 		logger.Error("message")
 		assert.Equal(t, `{"level":"error","message":"message","params":{}}`+"\n", string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-fatal", func(t *testing.T) {
 		w := newWriter()
-		logger := NewContext(w, DEBUG|INFO|WARN|ERROR|FATAL, "params")
+		logger := NewContext(w, FATAL, "params")
 		logger.ExitFn = func(c int) {
 			panic("os.Exit called")
 		}
@@ -199,9 +195,11 @@ func TestOnelogContextWithoutFields(t *testing.T) {
 	})
 	t.Run("basic-message-disabled-level-info", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, DEBUG|WARN|ERROR|FATAL)
+		logger := New(w, WARN)
 		logger.Info("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
+		logger.Error("message")
+		assert.Equal(t, ``, string(w.b), "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-debug", func(t *testing.T) {
 		w := newWriter()

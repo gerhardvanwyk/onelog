@@ -1,39 +1,47 @@
 package onelog
 
 const (
-	// INFO is the numeric code for INFO log level
-	INFO = uint8(0x1)
-	// DEBUG is the numeric code for DEBUG log level
-	DEBUG = uint8(0x2)
-	// WARN is the numeric code for WARN log level
-	WARN = uint8(0x4)
-	// ERROR is the numeric code for ERROR log level
-	ERROR = uint8(0x8)
-	// FATAL is the numeric code for FATAL log level
-	FATAL = uint8(0x10)
+	_ = iota
+
+	FINEST uint32 = 1 << iota
+	FINE
+	FINER
+	DEBUG
+	CONFIG
+	INFO
+	WARN
+	ERROR
+	SEVERE
+	FATAL
 )
 
-// ALL is a shortcut to INFO | DEBUG | WARN | ERROR | FATAL to enable all logging levels
-var ALL = uint8(INFO | DEBUG | WARN | ERROR | FATAL)
-
 // Levels is the mapping between int log levels and their string value
-var Levels = make([]string, 256)
-var levelsJSON = make([][]byte, 256)
+var Levels = make([]string, 2048)
+var levelsJSON = make([][]byte, 2048)
 var levelKey = "level"
 
 func init() {
+	Levels[FINEST] = "finest"
+	Levels[FINER] = "finer"
+	Levels[FINE] = "fine"
+	Levels[CONFIG] = "config"
 	Levels[INFO] = "info"
 	Levels[DEBUG] = "debug"
 	Levels[WARN] = "warn"
 	Levels[ERROR] = "error"
 	Levels[FATAL] = "fatal"
+	Levels[SEVERE] = "severe"
 	genLevelSlices()
 }
 
 func genLevelSlices() {
+	levelsJSON[FINEST] = []byte(`{"` + levelKey + `":"` + Levels[FINEST] + `","` + msgKey + `":`)
+	levelsJSON[FINER] = []byte(`{"` + levelKey + `":"` + Levels[FINER] + `","` + msgKey + `":`)
+	levelsJSON[FINE] = []byte(`{"` + levelKey + `":"` + Levels[FINE] + `","` + msgKey + `":`)
 	levelsJSON[INFO] = []byte(`{"` + levelKey + `":"` + Levels[INFO] + `","` + msgKey + `":`)
 	levelsJSON[DEBUG] = []byte(`{"` + levelKey + `":"` + Levels[DEBUG] + `","` + msgKey + `":`)
 	levelsJSON[WARN] = []byte(`{"` + levelKey + `":"` + Levels[WARN] + `","` + msgKey + `":`)
 	levelsJSON[ERROR] = []byte(`{"` + levelKey + `":"` + Levels[ERROR] + `","` + msgKey + `":`)
 	levelsJSON[FATAL] = []byte(`{"` + levelKey + `":"` + Levels[FATAL] + `","` + msgKey + `":`)
+	levelsJSON[SEVERE] = []byte(`{"` + levelKey + `":"` + Levels[SEVERE] + `","` + msgKey + `":`)
 }

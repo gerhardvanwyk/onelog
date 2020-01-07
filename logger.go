@@ -1,6 +1,7 @@
 package onelog
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,7 +19,7 @@ var (
 )
 
 // LevelText personalises the text for a specific level.
-func LevelText(level uint8, txt string) {
+func LevelText(level uint32, txt string) {
 	Levels[level] = txt
 	genLevelSlices()
 }
@@ -48,14 +49,14 @@ type ExitFunc func(int)
 type Logger struct {
 	hook        func(Entry)
 	w           io.Writer
-	levels      uint8
+	levels      uint32
 	ctx         []func(Entry)
 	ExitFn      ExitFunc
 	contextName string
 }
 
 // New returns a fresh onelog Logger with default values.
-func New(w io.Writer, levels uint8) *Logger {
+func New(w io.Writer, levels uint32) *Logger {
 	if w == nil {
 		w = ioutil.Discard
 	}
@@ -69,7 +70,7 @@ func New(w io.Writer, levels uint8) *Logger {
 
 // NewContext returns a fresh onelog Logger with default values and
 // context name set to provided contextName value.
-func NewContext(w io.Writer, levels uint8, contextName string) *Logger {
+func NewContext(w io.Writer, levels uint32, contextName string) *Logger {
 	if w == nil {
 		w = ioutil.Discard
 	}
@@ -379,68 +380,56 @@ func (l *Logger) WarnWithFields(msg string, fields func(Entry)) {
 
 // Error logs an entry with ERROR level
 func (l *Logger) Error(msg string) {
-	if ERROR&l.levels == 0 {
-		return
-	}
-	e := Entry{
-		Level:   ERROR,
-		Message: msg,
-	}
-
-	e.enc = gojay.BorrowEncoder(l.w)
-
-	// if we do not require a context then we
-	// format with formatter and return.
-	if l.contextName == "" {
-		l.beginEntry(e.Level, msg, e)
-		l.runHook(e)
-	} else {
-		l.openEntry(e.enc)
-	}
-
-	l.closeEntry(e)
-	l.finalizeIfContext(e)
-
-	e.enc.Release()
+	l.Log(ERROR, msg)
 }
 
 // ErrorWith returns a ChainEntry with ERROR level.
 func (l *Logger) ErrorWith(msg string) ChainEntry {
-	// first find writer for level
-	// if none, stop
-	e := ChainEntry{
-		Entry: Entry{
-			l:       l,
-			Level:   ERROR,
-			Message: msg,
-		},
-	}
-	e.disabled = ERROR&e.l.levels == 0
-	if e.disabled {
-		return e
-	}
-
-	e.Entry.enc = gojay.BorrowEncoder(l.w)
-
-	// if we do not require a context then we
-	// format with formatter and return.
-	if l.contextName == "" {
-		l.beginEntry(e.Level, msg, e.Entry)
-		l.runHook(e.Entry)
-		return e
-	}
-
-	l.openEntry(e.Entry.enc)
-	return e
+	return l.LogWith(ERROR, msg)
 }
 
 // ErrorWithFields logs an entry with ERROR level and custom fields.
 func (l *Logger) ErrorWithFields(msg string, fields func(Entry)) {
-	if ERROR&l.levels == 0 {
+	l.LogWithFields(ERROR, msg, fields)
+}
+
+// Fatal logs an entry with FATAL level.
+func (l *Logger) Fatal(msg string) {
+	l.Log(FATAL, msg)
+}
+
+// FatalWith returns a ChainEntry with FATAL level.
+func (l *Logger) FatalWith(msg string) ChainEntry {
+	return l.LogWith(FATAL, msg)
+}
+
+// FatalWithFields logs an entry with FATAL level and custom fields.
+func (l *Logger) FatalWithFields(msg string, fields func(Entry)) {
+	l.LogWithFields(FATAL, msg, fields)
+}
+
+// Severe logs an entry with SEVERE level.
+func (l *Logger) Severe(msg string) {
+	l.Log(SEVERE, msg)
+}
+
+// SevereWith returns a ChainEntry with SEVERE level.
+func (l *Logger) SevereWith(msg string) ChainEntry {
+	return l.LogWith(SEVERE, msg)
+}
+
+// SevereWithFields logs an entry with SEVERE level and custom fields.
+func (l *Logger) SevereWithFields(msg string, fields func(Entry)) {
+	l.LogWithFields(SEVERE, msg, fields)
+}
+
+func (l *Logger) LogWithFields(level uint32, msg string, fields func(Entry)) {
+	if level&l.levels == 0 {
 		return
 	}
+
 	e := Entry{
-		Level:   ERROR,
+		Level:   level,
 		Message: msg,
 	}
 
@@ -458,50 +447,24 @@ func (l *Logger) ErrorWithFields(msg string, fields func(Entry)) {
 	fields(e)
 	l.closeEntry(e)
 	l.finalizeIfContext(e)
-	e.enc.Release()
-}
-
-// Fatal logs an entry with FATAL level.
-func (l *Logger) Fatal(msg string) {
-	if FATAL&l.levels == 0 {
-		return
-	}
-	e := Entry{
-		Level:   FATAL,
-		Message: msg,
-	}
-
-	e.enc = gojay.BorrowEncoder(l.w)
-
-	// if we do not require a context then we
-	// format with formatter and return.
-	if l.contextName == "" {
-		l.beginEntry(e.Level, msg, e)
-		l.runHook(e)
-	} else {
-		l.openEntry(e.enc)
-	}
-
-	l.closeEntry(e)
-	l.finalizeIfContext(e)
 
 	e.enc.Release()
-
-	l.exit(1)
+	if level == FATAL {
+		l.exit(1)
+	}
 }
 
-// FatalWith returns a ChainEntry with FATAL level.
-func (l *Logger) FatalWith(msg string) ChainEntry {
+func (l *Logger) LogWith(level uint32, msg string) ChainEntry {
 	// first find writer for level
 	// if none, stop
 	e := ChainEntry{
 		Entry: Entry{
 			l:       l,
-			Level:   FATAL,
+			Level:   level,
 			Message: msg,
 		},
 	}
-	e.disabled = FATAL&e.l.levels == 0
+	e.disabled = level&e.l.levels == 0
 	if e.disabled {
 		return e
 	}
@@ -521,14 +484,15 @@ func (l *Logger) FatalWith(msg string) ChainEntry {
 	return e
 }
 
-// FatalWithFields logs an entry with FATAL level and custom fields.
-func (l *Logger) FatalWithFields(msg string, fields func(Entry)) {
-	if FATAL&l.levels == 0 {
+func (l *Logger) Log(level uint32, msg string) {
+
+	if level < l.levels {
+		fmt.Print(LO)
 		return
 	}
 
 	e := Entry{
-		Level:   FATAL,
+		Level:   level,
 		Message: msg,
 	}
 
@@ -543,19 +507,21 @@ func (l *Logger) FatalWithFields(msg string, fields func(Entry)) {
 		l.openEntry(e.enc)
 	}
 
-	fields(e)
 	l.closeEntry(e)
 	l.finalizeIfContext(e)
 
 	e.enc.Release()
-	l.exit(1)
+
+	if level == FATAL {
+		l.exit(1)
+	}
 }
 
 func (l *Logger) openEntry(enc *Encoder) {
 	enc.AppendBytes(logOpen)
 }
 
-func (l *Logger) beginEntry(level uint8, msg string, e Entry) {
+func (l *Logger) beginEntry(level uint32, msg string, e Entry) {
 	e.enc.AppendBytes(levelsJSON[level])
 	e.enc.AppendString(msg)
 
