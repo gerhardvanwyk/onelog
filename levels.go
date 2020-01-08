@@ -1,4 +1,4 @@
-package onelog
+package onelogplus
 
 const (
 	_ = iota

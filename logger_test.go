@@ -1,4 +1,4 @@
-package onelog
+package onelogplus
 
 import (
 	"errors"
@@ -203,30 +203,31 @@ func TestOnelogContextWithoutFields(t *testing.T) {
 	})
 	t.Run("basic-message-disabled-level-debug", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|WARN|ERROR|FATAL)
+		logger := New(w, WARN)
 		logger.Debug("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-warn", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|DEBUG|ERROR|FATAL)
+		logger := New(w, ERROR)
 		logger.Warn("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
 	t.Run("basic-message-disabled-level-error", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|WARN|DEBUG|FATAL)
+		logger := New(w, SEVERE)
 		logger.Error("message")
 		assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
 	})
-	t.Run("basic-message-disabled-level-fatal", func(t *testing.T) {
+	t.Run("basic-message-disabled-level-fatal-negative", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, INFO|WARN|ERROR|DEBUG)
+		logger := New(w, FATAL)
 		logger.ExitFn = func(c int) {
 			panic("os.Exit called")
 		}
 		defer func() {
-			assert.Equal(t, string(w.b), ``, "bytes written to the writer dont equal expected result")
+			assert.Equal(t, `{"level":"error","message":"message"}`, string(w.b),
+				"bytes written to the writer dont equal expected result")
 			r := recover()
 			if r != nil {
 				t.Errorf("logger.Fatal() recover = %v", r)
@@ -537,7 +538,7 @@ func TestOnelogHook(t *testing.T) {
 func TestOnelogContext(t *testing.T) {
 	t.Run("context-info-basic", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.Info("test")
@@ -547,7 +548,7 @@ func TestOnelogContext(t *testing.T) {
 	})
 	t.Run("context-info-fields", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.InfoWithFields("test", func(e Entry) {
@@ -559,7 +560,7 @@ func TestOnelogContext(t *testing.T) {
 
 	t.Run("context-debug-basic", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.Debug("test")
@@ -569,7 +570,7 @@ func TestOnelogContext(t *testing.T) {
 	})
 	t.Run("context-debug-fields", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.DebugWithFields("test", func(e Entry) {
@@ -581,7 +582,7 @@ func TestOnelogContext(t *testing.T) {
 
 	t.Run("context-warn-basic", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.Warn("test")
@@ -591,7 +592,7 @@ func TestOnelogContext(t *testing.T) {
 	})
 	t.Run("context-warn-fields", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.WarnWithFields("test", func(e Entry) {
@@ -603,7 +604,7 @@ func TestOnelogContext(t *testing.T) {
 
 	t.Run("context-error-basic", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.Error("test")
@@ -613,7 +614,7 @@ func TestOnelogContext(t *testing.T) {
 	})
 	t.Run("context-error-fields", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.ErrorWithFields("test", func(e Entry) {
@@ -625,7 +626,7 @@ func TestOnelogContext(t *testing.T) {
 
 	t.Run("context-fatal-basic", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.ExitFn = func(c int) {
@@ -643,7 +644,7 @@ func TestOnelogContext(t *testing.T) {
 	})
 	t.Run("context-fatal-fields", func(t *testing.T) {
 		w := newWriter()
-		logger := New(w, ALL).With(func(e Entry) {
+		logger := New(w, FINEST).With(func(e Entry) {
 			e.String("test", "test")
 		})
 		logger.ExitFn = func(c int) {

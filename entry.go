@@ -1,4 +1,4 @@
-package onelog
+package onelogplus
 
 import (
 	"github.com/francoispqt/gojay"

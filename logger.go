@@ -1,7 +1,6 @@
-package onelog
+package onelogplus
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -487,7 +486,6 @@ func (l *Logger) LogWith(level uint32, msg string) ChainEntry {
 func (l *Logger) Log(level uint32, msg string) {
 
 	if level < l.levels {
-		fmt.Print(LO)
 		return
 	}
 

@@ -15,4 +15,4 @@
 //	func main() {
 //		logger.Info("hello world !") // {"level":"info","message":"hello world !"}
 //	}
-package onelog
+package onelogplus

@@ -1,17 +1,16 @@
 package benchmarks
 
 import (
+	"github.com/gerhardvanwyk/onelogplus"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/francoispqt/onelog"
 )
 
 func TestPrint(t *testing.T) {
-	logger := onelog.New(os.Stdout, onelog.ALL).
-		Hook(func(e onelog.Entry) {
+	logger := onelogplus.New(os.Stdout, onelogplus.FINEST).
+		Hook(func(e onelogplus.Entry) {
 			e.Int64("time", time.Now().Unix())
 		})
 	logger.InfoWith("message").
@@ -27,8 +26,8 @@ func TestPrint(t *testing.T) {
 
 func BenchmarkOnelog(b *testing.B) {
 	b.Run("with-fields", func(b *testing.B) {
-		logger := onelog.New(ioutil.Discard, onelog.ALL).
-			Hook(func(e onelog.Entry) {
+		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
 		s := struct {
@@ -37,7 +36,7 @@ func BenchmarkOnelog(b *testing.B) {
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				logger.InfoWithFields("message", func(e onelog.Entry) {
+				logger.InfoWithFields("message", func(e onelogplus.Entry) {
 					e.Int("test", s.i)
 					e.String("test", "test")
 					e.String("test", "test")
@@ -51,8 +50,8 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("message-only", func(b *testing.B) {
-		logger := onelog.New(ioutil.Discard, onelog.ALL).
-			Hook(func(e onelog.Entry) {
+		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
 		b.ResetTimer()
@@ -63,8 +62,8 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("entry-message-only", func(b *testing.B) {
-		logger := onelog.New(ioutil.Discard, onelog.ALL).
-			Hook(func(e onelog.Entry) {
+		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
 		b.ResetTimer()
@@ -75,8 +74,8 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("entry-fields", func(b *testing.B) {
-		logger := onelog.New(ioutil.Discard, onelog.ALL).
-			Hook(func(e onelog.Entry) {
+		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
 		b.ResetTimer()
@@ -96,8 +95,8 @@ func BenchmarkOnelog(b *testing.B) {
 	})
 
 	b.Run("accumulated context", func(b *testing.B) {
-		logger := onelog.New(ioutil.Discard, onelog.ALL).
-			With(func(e onelog.Entry) {
+		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+			With(func(e onelogplus.Entry) {
 				e.Int("int", 1)
 			})
 		b.ResetTimer()

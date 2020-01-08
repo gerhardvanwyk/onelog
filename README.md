@@ -9,7 +9,23 @@
 # OnelogPlus
 Based on github.com/francoispqt/onelog
 
-Adds more log levels to include [FINEST, FINER, FINE, DEBUG, CONFIG, INFO, WARN, ERROR, FATAL, SEVERE ]
+Adds more log levels to include 
+```go
+const (
+	_ = iota
+
+	FINEST uint32 = 1 << iota
+	FINE
+	FINER
+	DEBUG
+	CONFIG
+	INFO
+	WARN
+	ERROR
+	SEVERE
+	FATAL
+)
+```
 
 Most common use cases a subset is used as a conventions. 
 
@@ -20,6 +36,10 @@ It uses the same implementation as onelog, the only difference is the level sett
 level on DEBUG then all levels are enabled above DEBUG => CONFIG, INFO, WARN, ERROR, SEVERE, FATAL
 FINEST is the lowest to FATAL the highest.
 
+You loose the bitwise comparison of onelog, but the speeds are comparable
+
+```text
+FROM francois
 It is a dead simple but very efficient JSON logger. 
 It is one of the fastest JSON logger out there. Also, it is one of the logger with the lowest allocation.
 
@@ -30,17 +50,18 @@ It is also modular as you can add a custom hook, define level text values, level
 Go 1.9 is required as it uses a type alias over gojay.Encoder.
 
 It is named onelog as a reference to zerolog and because it sounds like `One Love` song from Bob Marley :)
+```
 
 ## Get Started
 
 ```bash 
-go get github.com/francoispqt/onelog
+go get github.com/gerhardvanwyk/onelogplus
 ```
 
 Basic usage:
 
 ```go
-import "github.com/francoispqt/onelog"
+import "github.com/gerhardvanyk/onelogplus"
 
 func main() {
     // create a new Logger
@@ -48,7 +69,7 @@ func main() {
     // second argument is the level, which is an integer
     logger := onelog.New(
         os.Stdout, 
-        onelog.ALL, // shortcut for onelog.DEBUG|onelog.INFO|onelog.WARN|onelog.ERROR|onelog.FATAL,
+        onelog.DEBUG, // All levels above DEBUG (FINEST lowest, FATAL highest),
     )
     logger.Info("hello world !") // {"level":"info","message":"hello world"}
 }
@@ -57,7 +78,8 @@ func main() {
 
 ## Levels
 
-Levels are ints mapped to a string. The logger will check if level is enabled with an efficient bitwise &(AND), if disabled, it returns right away which makes onelog the fastest when running disabled logging with 0 allocs and less than 1ns/op. [See benchmarks](#benchmarks)
+Levels are ints mapped to a string. The logger will check if level is enabled with an efficient bitwise &(AND), if disabled, it returns 
+right away which makes onelog the fastest when running disabled logging with 0 allocs and less than 1ns/op. [See benchmarks](#benchmarks)
 
 When creating a logger you must use the `|` operator with different levels to toggle bytes. 
 
@@ -65,40 +87,13 @@ Example if you want levels INFO and WARN:
 ```go
 logger := onelog.New(
     os.Stdout, 
-    onelog.INFO|onelog.WARN,
+    onelog.INFO,
 )
 ```
 
-This allows you to have a logger with different levels, for example you can do: 
-```go
-var logger *onelog.Logger
-
-func init() {
-    // if we are in debug mode, enable DEBUG lvl
-    if os.Getenv("DEBUG") != "" {
-        logger = onelog.New(
-            os.Stdout, 
-            onelog.ALL, // shortcut for onelog.DEBUG|onelog.INFO|onelog.WARN|onelog.ERROR|onelog.FATAL
-        )
-        return
-    }
-    logger = onelog.New(
-        os.Stdout, 
-        onelog.INFO|onelog.WARN|onelog.ERROR|onelog.FATAL,
-    )
-}
-```
-
-Available levels:
-- onelog.DEBUG
-- onelog.INFO
-- onelog.WARN
-- onelog.ERROR
-- onelog.FATAL
-
 You can change their textual values by doing, do this only once at runtime as it is not thread safe: 
 ```go
-onelog.LevelText(onelog.INFO, "INFO")
+onelog.LevelText(onelog.INFO, "INFORMATION")
 ```
 
 ## Hook
@@ -109,12 +104,12 @@ Example:
 ```go 
 logger := onelog.New(
     os.Stdout, 
-    onelog.ALL,
+    onelog.DEBUG,
 )
 logger.Hook(func(e onelog.Entry) {
     e.String("time", time.Now().Format(time.RFC3339))
 })
-logger.Info("hello world !") // {"level":"info","message":"hello world","time":"2018-05-06T02:21:01+08:00"}
+logger.Info("hello world !") // {"level":"debug","message":"hello world","time":"2018-05-06T02:21:01+08:00"}
 ```
 
 ## Context
@@ -126,7 +121,7 @@ for values from using `logger.Hook`, will be enclosed in giving context name pro
 ```go
 logger := onelog.NewContext(
     os.Stdout, 
-    onelog.INFO|onelog.WARN,
+    onelog.INFO,
     "params"
 )
 
@@ -142,7 +137,7 @@ This principle also applies when inheriting from a previous created logger as be
 ```go
 parentLogger := onelog.New(
     os.Stdout, 
-    onelog.INFO|onelog.WARN,
+    onelog.INFO,
 )
 
 
@@ -276,7 +271,7 @@ onelog.LevelKey("lvl")
 
 Beware, these changes are global (affects all instances of the logger). Also, these function should be called only once at runtime to avoid any data race issue.
 
-# Benchmarks
+# Benchmarks TODO...
 
 For thorough benchmarks please see the results in the bench suite created by the author of zerolog here: https://github.com/rs/logbench 
 
