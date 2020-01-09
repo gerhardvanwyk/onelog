@@ -141,6 +141,21 @@ func (l *Logger) FinestWithFields(msg string, fields func(Entry)) {
 	l.LogWithFields(FINEST, msg, fields)
 }
 
+// Finer logs an entry with FINER level.
+func (l *Logger) Finer(msg string) {
+	l.Log(FINER, msg)
+}
+
+// FinerWith return an ChainEntry with FINER level.
+func (l *Logger) FinerWith(msg string) ChainEntry {
+	return l.LogWith(FINER, msg)
+}
+
+// FinerWithFields logs an entry with FINER level and custom fields.
+func (l *Logger) FinerWithFields(msg string, fields func(Entry)) {
+	l.LogWithFields(FINER, msg, fields)
+}
+
 // Fine logs an entry with FINE level.
 func (l *Logger) Fine(msg string) {
 	l.Log(FINE, msg)
