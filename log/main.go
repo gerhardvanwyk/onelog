@@ -106,6 +106,13 @@ func Warn(msg string) {
 	logger.Warn(msg)
 }
 
+// WarnE prints a message with log level WARN and error.
+func WarnE(msg string, err error) {
+	logger.WarnWithFields(msg, func(e log.Entry) {
+		e.Err("ERROR", err)
+	})
+}
+
 // WarnWith returns a ChainEntry with WARN level
 func WarnWith(msg string) log.ChainEntry {
 	return logger.LogWith(log.WARN, msg)
@@ -119,6 +126,13 @@ func WarnWithFields(msg string, fields func(e log.Entry)) {
 // Error prints a message with log level ERROR.
 func Error(msg string) {
 	logger.Error(msg)
+}
+
+// ErrorE prints a message with log level ERROR and error.
+func ErrorE(msg string, err error) {
+	logger.ErrorWithFields(msg, func(e log.Entry) {
+		e.Err("ERROR", err)
+	})
 }
 
 // ErrorWith returns a ChainEntry with ERROR level.
@@ -136,6 +150,13 @@ func Severe(msg string) {
 	logger.Log(log.SEVERE, msg)
 }
 
+// SevereE prints a message with log level SEVERE and error.
+func SevereE(msg string, err error) {
+	logger.SevereWithFields(msg, func(e log.Entry) {
+		e.Err("ERROR", err)
+	})
+}
+
 // SevereWith returns a ChainEntry with SEVERE level.
 func SevereWith(msg string) log.ChainEntry {
 	return logger.LogWith(log.SEVERE, msg)
@@ -149,6 +170,13 @@ func SevereWithFields(msg string, fields func(log.Entry)) {
 // Fatal prints a message with log level FATAL.
 func Fatal(msg string) {
 	logger.Fatal(msg)
+}
+
+// FatalE prints a message with log level FATAL and error.
+func FatalE(msg string, err error) {
+	logger.FatalWithFields(msg, func(e log.Entry) {
+		e.Err("ERROR", err)
+	})
 }
 
 // FatalWith returns a ChainEntry with FATAL level.
