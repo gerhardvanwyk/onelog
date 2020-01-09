@@ -26,7 +26,7 @@ func TestPrint(t *testing.T) {
 
 func BenchmarkOnelog(b *testing.B) {
 	b.Run("with-fields", func(b *testing.B) {
-		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+		logger := onelogplus.New(ioutil.Discard, onelogplus.FINEST).
 			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
@@ -50,7 +50,7 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("message-only", func(b *testing.B) {
-		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+		logger := onelogplus.New(ioutil.Discard, onelogplus.FINEST).
 			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
@@ -62,7 +62,7 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("entry-message-only", func(b *testing.B) {
-		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+		logger := onelogplus.New(ioutil.Discard, onelogplus.FINEST).
 			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
@@ -74,7 +74,7 @@ func BenchmarkOnelog(b *testing.B) {
 		})
 	})
 	b.Run("entry-fields", func(b *testing.B) {
-		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+		logger := onelogplus.New(ioutil.Discard, onelogplus.FINEST).
 			Hook(func(e onelogplus.Entry) {
 				e.Int64("time", time.Now().Unix())
 			})
@@ -95,7 +95,7 @@ func BenchmarkOnelog(b *testing.B) {
 	})
 
 	b.Run("accumulated context", func(b *testing.B) {
-		logger := onelogplus.New(ioutil.Discard, onelogplus.ALL).
+		logger := onelogplus.New(ioutil.Discard, onelogplus.FINEST).
 			With(func(e onelogplus.Entry) {
 				e.Int("int", 1)
 			})
