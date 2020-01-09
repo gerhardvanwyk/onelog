@@ -83,7 +83,7 @@ right away which makes onelog the fastest when running disabled logging with 0 a
 
 When creating a logger you must use the `|` operator with different levels to toggle bytes. 
 
-Example if you want levels INFO and WARN:
+Example if you want levels INFO, WARN, SEVERE, ERROR and FATAL:
 ```go
 logger := onelog.New(
     os.Stdout, 
